@@ -3,7 +3,9 @@
   "products": [
     {
       "name": "Isuzu (Principal matcha)",
-      "url": "https://www.marukyu-koyamaen.co.jp/english/shop/products/1191040c1"
+      "url": "https://www.marukyu-koyamaen.co.jp/english/shop/products/1191040c1",
+      "name": "control test",
+      "url": "https://www.marukyu-koyamaen.co.jp/english/shop/products/1117040c6"
     }
   ]
 }
