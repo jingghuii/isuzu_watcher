@@ -1,0 +1,73 @@
+name: matcha-watch
+
+on:
+  schedule:
+    # Every 5 minutes. A random 0-120s sleep in the job turns this into an
+    # effective 5-7 minute cadence and stops every request landing exactly on
+    # :00 / :05 / :10. GitHub's scheduler is best-effort and can run late under
+    # load, which adds further natural jitter.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'What to run'
+        required: true
+        default: selftest
+        type: choice
+        options: [selftest, test-telegram, once, dry-run]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: matcha-watch
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so `git pull --rebase` works when persisting state
+
+      - name: Randomize timing (5-7 min effective interval)
+        if: github.event_name == 'schedule'
+        run: sleep $(( RANDOM % 121 ))
+
+      - name: Run watcher
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          BLIND_AFTER: '6'
+          HEARTBEAT: '1'
+          HEARTBEAT_HOUR: '9'
+          PRICE_ALERTS: '1'
+        run: |
+          case "${{ github.event.inputs.mode }}" in
+            selftest)      python3 matcha_watch.py --selftest ;;
+            test-telegram) python3 matcha_watch.py --test-telegram ;;
+            dry-run)       python3 matcha_watch.py --once --dry-run ;;
+            *)             python3 matcha_watch.py --once ;;
+          esac
+
+      - name: Persist state
+        if: always() && github.event.inputs.mode != 'selftest' && github.event.inputs.mode != 'dry-run'
+        run: |
+          git add state.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "State unchanged - nothing to commit."
+            exit 0
+          fi
+          git config user.name  "matcha-watch"
+          git config user.email "matcha-watch@users.noreply.github.com"
+          git commit -m "state: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for i in 1 2 3; do
+            if git pull --rebase --autostash && git push; then
+              echo "Pushed."; exit 0
+            fi
+            sleep $(( RANDOM % 10 + 5 ))
+          done
+          echo "Could not push state after 3 attempts." >&2
+          exit 1

@@ -1,0 +1,9 @@
+{
+  "_comment": "Add more products by appending objects here. Any Marukyu-Koyamaen product URL works; the detector is generic across their shop theme. 'name' is only used for notification text.",
+  "products": [
+    {
+      "name": "Isuzu (Principal matcha)",
+      "url": "https://www.marukyu-koyamaen.co.jp/english/shop/products/1191040c1"
+    }
+  ]
+}
