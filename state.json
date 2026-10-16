@@ -4,14 +4,15 @@
   },
   "https://www.marukyu-koyamaen.co.jp/english/shop/products/1117040c6": {
     "fail_streak": 0,
-    "notified_in_stock": false,
+    "in_stock_since": "2026-10-16T17:21:07+08:00",
+    "notified_in_stock": true,
     "prices": {
       "1117040C1": 7600,
       "1117040C6": 7350,
       "1117090C1": 16700
     },
-    "since": "2026-10-08T11:03:43+08:00",
-    "status": "OUT_OF_STOCK"
+    "since": "2026-10-16T17:21:07+08:00",
+    "status": "IN_STOCK"
   },
   "https://www.marukyu-koyamaen.co.jp/english/shop/products/1191040c1": {
     "fail_streak": 0,
